@@ -1,0 +1,60 @@
+[project]
+name = "app"
+version = "0.1.0"
+description = ""
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "fastapi[standard]<1.0.0,>=0.114.2",
+    "pydantic>2.0",
+    "httpx<1.0.0,>=0.25.1",
+    "pydantic-settings<3.0.0,>=2.2.1",
+    "transformers==4.46.2",
+    "datasets==3.1.0",
+    "openvino==2024.4.0",
+    "openvino-genai==2024.4.0.0",
+    "openvino-telemetry==2024.1.0",
+    "openvino-tokenizers==2024.4.0.0",
+    "optimum==1.23.3",
+    "optimum-intel @ git+https://github.com/huggingface/optimum-intel.git",
+    "neural-compressor==3.1.1",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest<8.0.0,>=7.4.3",
+    "mypy<2.0.0,>=1.8.0",
+    "ruff<1.0.0,>=0.2.2",
+    "pre-commit<4.0.0,>=3.6.2",
+    "types-passlib<2.0.0.0,>=1.7.7.20240106",
+    "coverage<8.0.0,>=7.4.3",
+]
+
+[tool.mypy]
+strict = true
+exclude = ["venv", ".venv", "alembic"]
+
+[tool.ruff]
+target-version = "py310"
+exclude = ["alembic"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG001", # unused arguments in functions
+]
+ignore = [
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "W191", # indentation contains tabs
+    "B904", # Allow raising exceptions without from e, for HTTPException
+]
+
+[tool.ruff.lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
