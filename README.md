@@ -79,6 +79,18 @@ We evaluated and selected lightweight transformer models suitable for CPU infere
    - PPO (Proximal Policy Optimization) fine-tuning
    - Loss function: KL Divergence + Causal Loss
 
+### Evaluation
+
+Fine-tuning metrics
+
+| Model                | BLEU     | Precisions (1-gram, 2-gram, 3-gram, 4-gram) | Brevity Penalty | Length Ratio | Translation Length | Reference Length |
+| -------------------- | -------- | ------------------------------------------- | --------------- | ------------ | ------------------ | ---------------- |
+| LaMini-Flan-T5-77M   | 0.162680 | [0.571584, 0.349920, 0.223066, 0.174198]    | 0.547903        | 0.624353     | 50577              | 81007            |
+| LaMini-T5-61M        | 0.138377 | [0.569064, 0.326063, 0.190966, 0.142126]    | 0.519445        | 0.604232     | 48947              | 81007            |
+| LaMini-T5-61M-ppo/   | 0.137452 | [0.588333, 0.333662, 0.191974, 0.137355]    | 0.512445        | 0.599319     | 48549              | 81007            |
+| SmolLM2-135M-full    | 0.215715 | [0.266698, 0.236559, 0.203836, 0.168377]    | 1.0             | 3.749565     | 303741             | 81007            |
+| LaMini-GPT-124M-full | 0.214838 | [0.265679, 0.235619, 0.202992, 0.167648]    | 1.0             | 3.763934     | 304905             | 81007            |
+
 ## Related Research
 
 The system builds upon several key research areas in query reformulation:
@@ -103,7 +115,7 @@ The system builds upon several key research areas in query reformulation:
 
 ## Future Improvements
 
-1. Explore additional optimization techniques for further latency reduction
+1. Explore additional optimization techniques for further latency reduction: layer pruning, model compression
 2. Implement adaptive query reformulation based on result quality
 3. Expand training dataset with domain-specific query pairs
 4. Investigate hybrid approaches combining rule-based and ML methods

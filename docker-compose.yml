@@ -3,17 +3,16 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: backend
     working_dir: /app
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "3000"]
     volumes:
       - ./backend:/app
     expose:
       - "3000"
-    ports:
-      - "3000:3000"
     environment:
       - MODEL_PATH=SteveTran/T5-small-query-expansion-Q4
+    deploy:
+      replicas: 1
 
   frontend:
     build:
@@ -24,7 +23,7 @@ services:
     volumes:
       - ./frontend:/app
     ports:
-      - "7860:7860"
+      - "8000:7860"
     environment:
       - ML_ENDPOINT_URL=http://backend:3000/rewrite
     depends_on:

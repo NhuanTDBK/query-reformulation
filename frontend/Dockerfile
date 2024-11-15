@@ -7,7 +7,9 @@ RUN apt-get update && apt-get install -y \
     && pip install --upgrade pip uv
 
 WORKDIR /app
-COPY . /app
+
+COPY pyproject.toml /app
 RUN uv pip install --system --no-cache-dir -r pyproject.toml
 
-CMD ["python", "app.py"]
+COPY . /app
+CMD ["python", "app/app.py"]

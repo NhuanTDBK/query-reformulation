@@ -2,7 +2,7 @@ import os
 from typing import Dict, Any
 from fastapi import FastAPI
 
-from handler import EndpointHandler
+from app.handler import EndpointHandler
 
 app = FastAPI()
 endpoint_handler = EndpointHandler(os.environ.get("MODEL_PATH", "."))
