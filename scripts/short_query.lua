@@ -5,7 +5,6 @@ local inputs = {
     "What is the capital of France?",
     "Who wrote 'To Kill a Mockingbird'?",
     "What is the speed of light?",
-    "What is the population of the United States?",
 }
 
 math.randomseed(os.time())

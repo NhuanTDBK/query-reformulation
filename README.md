@@ -143,7 +143,7 @@ Running 1m test @ http://50.18.255.74:8040/rewrite
 
 ```
 Long queries
-Running 10s test @ http://50.18.255.74:8040/rewrite
+Running 1m test @ http://50.18.255.74:8040/rewrite
   1 threads and 1 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
     Latency    70.88ms    5.59ms 111.41ms   80.00%
