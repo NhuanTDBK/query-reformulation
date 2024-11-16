@@ -13,6 +13,20 @@ docker-compose build && docker-compose up
 
 - Access to `localhost:8040/docs` for API documentation
 - Access to `https://huggingface.co/spaces/SteveTran/query-rewrite-demo` for Gradio app
+- To generate more than one query, you can use `curl` or `postman` to send a request to `localhost:8040/rewrite` with the following payload
+
+```json
+{
+   {
+      "inputs": "Create a table for top noise cancelling headphones that are not expensive",
+      "parameters": {
+         "temperature": 1.0, # higher temperature will generate more diverse queries
+         "do_sample": true,
+         "num_return_sequences": 2,
+      }
+   }
+}
+```
 
 ## Overview
 
