@@ -8,8 +8,9 @@ INSTRUCTION = "rewrite: "
 generation_config = {
     "max_new_tokens": 8,
     "use_cache": True,
-    "num_beams": 5,
-    "num_return_sequences": 2,
+    "temperature": 0.6,
+    "do_sample": True,
+    "top_p": 0.95,
 }
 
 
