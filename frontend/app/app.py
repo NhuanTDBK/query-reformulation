@@ -4,7 +4,9 @@ import os
 
 import gradio as gr
 
-ML_ENDPOINT_URL = os.environ.get("ML_ENDPOINT_URL", "http://0.0.0.0:3000/rewrite")
+ML_ENDPOINT_URL = os.environ.get("ML_ENDPOINT_URL", "http://50.18.255.74:8040/rewrite")
+client_session = requests.Session()
+client_session.keep_alive = 5
 
 # Example queries to help users understand the app
 EXAMPLE_QUERIES = [
@@ -27,7 +29,7 @@ def make_request(query):
         # Replace with your actual API endpoint
         if "rewrite: " not in query:
             query = f"rewrite: {query}"
-        response = requests.post(ML_ENDPOINT_URL, json={"inputs": query})
+        response = client_session.post(ML_ENDPOINT_URL, json={"inputs": query})
         response.raise_for_status()
         result = response.json()
     except requests.exceptions.RequestException as e:
@@ -40,7 +42,7 @@ def make_request(query):
 
 
 # Create the Gradio interface
-with gr.Blocks() as demo:
+with gr.Blocks() as app:
     gr.Markdown(
         """
     # Query Reformulation Assistant
@@ -93,4 +95,4 @@ with gr.Blocks() as demo:
 
 # Launch the app
 if __name__ == "__main__":
-    demo.launch(share=False, server_name="0.0.0.0", server_port=7860, favicon_path=None)
+    app.launch()

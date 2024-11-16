@@ -11,7 +11,8 @@ A machine learning system that reformulates input queries into semantically simi
 docker-compose build && docker-compose up
 ```
 
-- Access to `localhost:7860`
+- Access to `localhost:8040/docs` for API documentation
+- Access to `https://huggingface.co/spaces/SteveTran/query-rewrite-demo` for Gradio app
 
 ## Overview
 
@@ -24,16 +25,31 @@ The system takes a natural language query as input and generates multiple altern
 - Lightweight deployment with minimal infrastructure requirements
 - Preservation of original search intent
 
-## Example Transformations
+## How to approach the problem
 
-Input: "In what year was the winner of the 44th edition of the Miss World competition born?"  
-Output: "44th Miss World competition winner birth year"
+### Related Research
 
-Input: "Who lived longer, Nikola Tesla or Milutin Milankovic?"  
-Outputs:
+The system builds upon several key research areas in query reformulation:
 
-- "Nikola Tesla lifespan"
-- "Milutin Milankovic lifespan"
+1. **Query-to-Query Transformations**
+
+   - Term dropping and substitution [Banerjee & Lavie, 2005]
+   - Term expansion techniques
+   - Machine translation approaches
+   - Reinforcement learning methods
+
+2. **E-commerce Applications**
+   - Amazon's research on product search optimization using RL-powered query reformulation
+   - Keyword reformulation (KR) for handling less frequent search terms
+   - Query-to-keyword reformulations using seq2seq models
+
+### Solution Approach
+
+- **Data Collection**: Use a large-scale search query dataset to train a query reformulation model, mostly less than 300M Transformers. Check in [Data Processing](notebook/query_generation_dataset.ipynb)
+- **Model Selection**: Choose a lightweight transformer model suitable for CPU inference and train it on the dataset. Check in [Training](notebook/query_seq2seq.ipynb)
+- **Optimization**: Apply alignment, quantization and fine-tuning techniques to reduce model size and improve performance. Check in [Optimization](notebook/query_ppo.ipynb)
+- **Evaluation**: Assess model performance using BLEU score and other metrics
+- **Deployment**: Deploy the model on a cloud-based infrastructure for real-time query reformulation
 
 ## Technical Architecture
 
@@ -83,29 +99,64 @@ We evaluated and selected lightweight transformer models suitable for CPU infere
 
 Fine-tuning metrics
 
-| Model                | BLEU     | Precisions (1-gram, 2-gram, 3-gram, 4-gram) | Brevity Penalty | Length Ratio | Translation Length | Reference Length |
-| -------------------- | -------- | ------------------------------------------- | --------------- | ------------ | ------------------ | ---------------- |
-| LaMini-Flan-T5-77M   | 0.162680 | [0.571584, 0.349920, 0.223066, 0.174198]    | 0.547903        | 0.624353     | 50577              | 81007            |
-| LaMini-T5-61M        | 0.138377 | [0.569064, 0.326063, 0.190966, 0.142126]    | 0.519445        | 0.604232     | 48947              | 81007            |
-| LaMini-T5-61M-ppo/   | 0.137452 | [0.588333, 0.333662, 0.191974, 0.137355]    | 0.512445        | 0.599319     | 48549              | 81007            |
-| SmolLM2-135M-full    | 0.215715 | [0.266698, 0.236559, 0.203836, 0.168377]    | 1.0             | 3.749565     | 303741             | 81007            |
-| LaMini-GPT-124M-full | 0.214838 | [0.265679, 0.235619, 0.202992, 0.167648]    | 1.0             | 3.763934     | 304905             | 81007            |
+| Model              | BLEU     | Precisions (1-gram, 2-gram, 3-gram, 4-gram) | Brevity Penalty | Length Ratio | Translation Length | Reference Length |
+| ------------------ | -------- | ------------------------------------------- | --------------- | ------------ | ------------------ | ---------------- |
+| LaMini-Flan-T5-77M | 0.162680 | [0.571584, 0.349920, 0.223066, 0.174198]    | 0.547903        | 0.624353     | 50577              | 81007            |
+| LaMini-T5-61M      | 0.138377 | [0.569064, 0.326063, 0.190966, 0.142126]    | 0.519445        | 0.604232     | 48947              | 81007            |
+| LaMini-T5-61M-PPO  | 0.137452 | [0.588333, 0.333662, 0.191974, 0.137355]    | 0.512445        | 0.599319     | 48549              | 81007            |
+| SmolLM2-135M       | 0.215715 | [0.266698, 0.236559, 0.203836, 0.168377]    | 1.0             | 3.749565     | 303741             | 81007            |
+| LaMini-GPT-124M    | 0.214838 | [0.265679, 0.235619, 0.202992, 0.167648]    | 1.0             | 3.763934     | 304905             | 81007            |
 
-## Related Research
+## Deployments
 
-The system builds upon several key research areas in query reformulation:
+### Infrastructure
 
-1. **Query-to-Query Transformations**
+- **Compute**: AWS EC2 c7i.large 2vcpu, 4gb mem, region: us-west-1
+- **Networking**: VPC peering for private communication
 
-   - Term dropping and substitution [Banerjee & Lavie, 2005]
-   - Term expansion techniques
-   - Machine translation approaches
-   - Reinforcement learning methods
+### Flow
 
-2. **E-commerce Applications**
-   - Amazon's research on product search optimization using RL-powered query reformulation
-   - Keyword reformulation (KR) for handling less frequent search terms
-   - Query-to-keyword reformulations using seq2seq models
+```mermaid
+flowchart LR
+   User -->|Interacts with| GradioApp[Gradio app]
+   GradioApp -->|Sends request to| FastAPI[Fast API]
+   Nginx -->|Routes requests to|
+   FastAPI -->|Utilizes| OpenVINORuntime[OpenVINO Runtime]
+```
+
+### Benchmark
+
+```
+Short queries
+Running 1m test @ http://50.18.255.74:8040/rewrite
+  1 threads and 1 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    75.29ms    7.22ms 136.54ms   72.84%
+    Req/Sec    26.58      8.23    40.00     77.46%
+  Latency Distribution
+     50%   74.90ms
+     75%   79.64ms
+     90%   83.71ms
+     99%   97.08ms
+  1594 requests in 1.00m, 275.39KB read
+```
+
+```
+Long queries
+Running 10s test @ http://50.18.255.74:8040/rewrite
+  1 threads and 1 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    70.88ms    5.59ms 111.41ms   80.00%
+    Req/Sec    14.08      5.04    20.00     57.58%
+  Latency Distribution
+     50%   70.46ms
+     75%   72.07ms
+     90%   75.98ms
+     99%   89.37ms
+  140 requests in 10.01s, 26.49KB read
+Requests/sec:     13.99
+Transfer/sec:      2.65KB
+```
 
 ## References
 
@@ -119,3 +170,4 @@ The system builds upon several key research areas in query reformulation:
 2. Implement adaptive query reformulation based on result quality
 3. Expand training dataset with domain-specific query pairs
 4. Investigate hybrid approaches combining rule-based and ML methods
+5. Try high-performance model serving in C++ or Rust for further latency reduction
